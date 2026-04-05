@@ -1,0 +1,192 @@
+<div class="cf-page-header">
+  <div>
+    <h2 class="cf-page-title">{{page_title}}</h2>
+    {{#school_name}}
+    <p class="cf-page-meta">{{school_name}}</p>
+    {{/school_name}}
+  </div>
+  {{#is_admin}}
+  <p class="cf-page-meta cf-admin-badge">{{admin_label}}</p>
+  {{/is_admin}}
+</div>
+
+{{#is_admin}}
+<form class="cf-filterbar" method="get" action="">
+  <label class="cf-filter-field">
+    <span class="cf-filter-label">{{teacher_filter_label}}</span>
+    <select name="teacher" class="custom-select">
+      {{#teacher_options}}
+      <option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>
+      {{/teacher_options}}
+    </select>
+  </label>
+  <label class="cf-filter-field">
+    <span class="cf-filter-label">{{class_filter_label}}</span>
+    <select name="class" class="custom-select">
+      {{#class_options}}
+      <option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>
+      {{/class_options}}
+    </select>
+  </label>
+  <label class="cf-filter-field">
+    <span class="cf-filter-label">{{day_filter_label}}</span>
+    <select name="day" class="custom-select">
+      {{#day_options}}
+      <option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>
+      {{/day_options}}
+    </select>
+  </label>
+  <button type="submit" class="btn btn-primary">{{apply_filters_label}}</button>
+  <a href="{{clear_filters_url}}" class="btn btn-link">{{clear_filters_label}}</a>
+</form>
+{{/is_admin}}
+
+{{^is_admin}}
+<form class="cf-filterbar" method="get" action="">
+  <label class="cf-filter-field">
+    <span class="cf-filter-label">{{day_filter_label}}</span>
+    <select name="day" class="custom-select">
+      {{#day_options}}
+      <option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>
+      {{/day_options}}
+    </select>
+  </label>
+  <button type="submit" class="btn btn-primary">{{apply_filters_label}}</button>
+  <a href="{{clear_filters_url}}" class="btn btn-link">{{clear_filters_label}}</a>
+</form>
+{{/is_admin}}
+
+{{#has_multiple_timetables}}
+<ul class="nav nav-tabs cf-tabs" role="tablist">
+  {{#timetables}}
+  <li class="nav-item" role="presentation">
+    <button class="nav-link {{#is_active}}active{{/is_active}}" id="{{tab_id}}" data-bs-toggle="tab" data-toggle="tab" data-bs-target="#{{panel_id}}" type="button" role="tab" aria-controls="{{panel_id}}" aria-selected="{{#is_active}}true{{/is_active}}{{^is_active}}false{{/is_active}}">
+      {{name}}
+    </button>
+  </li>
+  {{/timetables}}
+</ul>
+{{/has_multiple_timetables}}
+
+<div class="tab-content cf-tab-content">
+{{#timetables}}
+<section class="cf-timetable-block tab-pane fade {{#is_active}}show active{{/is_active}}" id="{{panel_id}}" role="tabpanel" aria-labelledby="{{tab_id}}">
+  <div class="cf-panel-card">
+    <div class="cf-page-header">
+      <div>
+        <h3 class="cf-page-title">{{name}}</h3>
+        {{#term_name}}
+        <p class="cf-page-meta">{{term_label}}: {{term_name}}</p>
+        {{/term_name}}
+      </div>
+      {{#is_stale}}
+      <p class="cf-page-meta">{{stale_label}}</p>
+      {{/is_stale}}
+    </div>
+
+    <div class="cf-timetable-shell">
+      <div class="cf-timetable-wrapper">
+        <div class="cf-timetable">
+          <div class="cf-gutter">
+            <div class="cf-gutter-header"></div>
+            {{#period_schedules}}
+            <div class="cf-gutter-cell {{#is_break}}cf-gutter-cell--break{{/is_break}} {{#is_current_period}}cf-gutter-cell--current{{/is_current_period}}">
+              <span class="cf-gutter-name">{{name}}</span>
+              {{^is_break}}
+              <span class="cf-gutter-time">{{start_time}}</span>
+              {{/is_break}}
+            </div>
+            {{/period_schedules}}
+          </div>
+
+          <div class="cf-days" style="grid-template-columns: {{grid_columns}};">
+            {{#columns}}
+            <div class="cf-day-column {{#is_today}}cf-day-column--today{{/is_today}}">
+              <div class="cf-day-header">
+                <span class="cf-day-label">{{label}}</span>
+                {{#is_today}}
+                <span class="cf-today-dot"></span>
+                {{/is_today}}
+              </div>
+
+              {{#periods}}
+              {{#is_break}}
+              <div class="cf-cell cf-cell--break {{#is_current_period}}cf-cell--current{{/is_current_period}}">
+                <span class="cf-break-label">{{break_label}}</span>
+              </div>
+              {{/is_break}}
+              {{^is_break}}
+              <div class="cf-cell {{^has_entries}}cf-cell--empty{{/has_entries}} {{#is_single}}cf-cell--single{{/is_single}} {{#is_admin}}cf-cell--admin{{/is_admin}} {{#is_current_period}}cf-cell--current{{/is_current_period}}">
+                {{#entries}}
+                <div class="cf-entry {{#is_admin}}cf-entry--admin{{/is_admin}}" style="background-color: {{bg_color}}; border-color: {{border_color}}; color: {{color}};" title="{{title_text}}" aria-label="{{title_text}}">
+                  <div class="cf-entry-inner">
+                    {{^is_admin}}
+                    <span class="cf-entry-dot" style="background-color: {{color}};"></span>
+                    {{/is_admin}}
+                    <div class="cf-entry-details">
+                      <div class="cf-entry-subject-row">
+                        <div class="cf-entry-subject">{{subject_name}}</div>
+                        {{#is_online}}
+                        <span class="cf-entry-online" title="{{online_label}}" aria-label="{{online_label}}">&#128249;</span>
+                        {{/is_online}}
+                      </div>
+                      {{#is_admin}}
+                      <div class="cf-entry-class">{{compact_meta}}</div>
+                      {{/is_admin}}
+                      {{^is_admin}}
+                      {{#show_teacher}}
+                      <div class="cf-entry-teacher">{{teacher_name}}</div>
+                      {{/show_teacher}}
+                      {{#class_name}}
+                      <div class="cf-entry-class">{{class_name}}</div>
+                      {{/class_name}}
+                      {{#show_room}}
+                      <div class="cf-entry-room">{{classroom_name}}</div>
+                      {{/show_room}}
+                      {{#has_meeting_link}}
+                      <div class="cf-entry-links">
+                        <a href="{{meeting_link}}" target="_blank" rel="noopener">{{meeting_label}}</a>
+                      </div>
+                      {{/has_meeting_link}}
+                      {{#has_course_link}}
+                      <div class="cf-entry-links">
+                        <a href="{{course_url}}">{{course_label}}</a>
+                      </div>
+                      {{/has_course_link}}
+                      {{/is_admin}}
+                    </div>
+                  </div>
+                </div>
+                {{/entries}}
+              </div>
+              {{/is_break}}
+              {{/periods}}
+            </div>
+            {{/columns}}
+          </div>
+        </div>
+      </div>
+
+      <div class="cf-table-actions">
+        <a class="cf-action-button" href="{{refresh_url}}" title="{{refresh_title}}" aria-label="{{refresh_title}}">
+          <span aria-hidden="true">&#x21bb;</span>
+        </a>
+        <a class="cf-action-button cf-action-button--pdf" href="{{pdf_url}}" title="{{pdf_title}}" aria-label="{{pdf_title}}" target="_blank" rel="noopener">
+          <span aria-hidden="true">&#x2399;</span>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+{{/timetables}}
+</div>
+
+{{^timetables}}
+<div class="cf-empty-state">{{empty_message}}</div>
+{{/timetables}}
+
+{{#powered_by}}
+<div class="cf-powered-by">
+  <a href="{{powered_by_url}}" target="_blank" rel="noopener">{{powered_by}}</a>
+</div>
+{{/powered_by}}
