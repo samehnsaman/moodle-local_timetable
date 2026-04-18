@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Version information for local_timetable.
+ * Cache definitions for local_timetable.
  *
  * @package   local_timetable
  * @copyright 2026 Sameh Naim <sameh@timetable.digital>
@@ -24,8 +24,10 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->component = 'local_timetable';
-$plugin->version = 2026041803;
-$plugin->requires = 2022041900;
-$plugin->maturity = MATURITY_ALPHA;
-$plugin->release = '0.1.0';
+$definitions = [
+    'sessionchecked' => [
+        'mode' => cache_store::MODE_SESSION,
+        'simplekeys' => true,
+        'simpledata' => true,
+    ],
+];

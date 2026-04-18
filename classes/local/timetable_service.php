@@ -44,8 +44,6 @@ class timetable_service {
      * @throws \moodle_exception
      */
     public function get_user_timetable($user, bool $forcefresh = false, array $viewfilters = []): array {
-        global $SESSION;
-
         $user = $this->resolve_user_record($user);
         $debugenabled = (bool)get_config('local_timetable', 'debugenabled');
         $filters = $this->build_filters($user);
@@ -56,7 +54,7 @@ class timetable_service {
         $cachekey = $filters['cachekey'];
         $cachedrecord = $this->get_cached_record($cachekey);
 
-        if (!$forcefresh && !empty($SESSION->local_timetable_checked[$cachekey]) && $cachedrecord) {
+        if (!$forcefresh && $this->is_checked_this_session($cachekey) && $cachedrecord) {
             return $this->build_render_payload(
                 $this->decode_json($cachedrecord->responsejson),
                 $filters,
@@ -72,7 +70,7 @@ class timetable_service {
         } catch (\moodle_exception $exception) {
             $requestdebug = $debugenabled ? $this->build_request_debug($client, $filters) : [];
             if ($cachedrecord) {
-                $SESSION->local_timetable_checked[$cachekey] = true;
+                $this->mark_checked_this_session($cachekey);
                 $payload = $this->build_render_payload(
                     $this->decode_json($cachedrecord->responsejson),
                     $filters,
@@ -93,7 +91,7 @@ class timetable_service {
         $requestdebug = $debugenabled ? $this->build_request_debug($client, $filters) : [];
 
         if ($cachedrecord && $this->versions_match($cachedversions, $remoteversions) && !$forcefresh) {
-            $SESSION->local_timetable_checked[$cachekey] = true;
+            $this->mark_checked_this_session($cachekey);
             $payload = $this->build_render_payload(
                 $this->decode_json($cachedrecord->responsejson),
                 $filters,
@@ -107,13 +105,42 @@ class timetable_service {
         }
 
         $this->store_cached_record($cachekey, $user, $filters, $remoteresponse, $remoteversions, $cachedrecord);
-        $SESSION->local_timetable_checked[$cachekey] = true;
+        $this->mark_checked_this_session($cachekey);
 
         $payload = $this->build_render_payload($remoteresponse, $filters, false, $viewfilters);
         if ($debugenabled) {
             $payload['request_debug'] = $requestdebug;
         }
         return $payload;
+    }
+
+    /**
+     * Check whether the request key has already been validated in the current session.
+     *
+     * @param string $cachekey
+     * @return bool
+     */
+    private function is_checked_this_session(string $cachekey): bool {
+        return (bool)$this->get_session_cache()->get($cachekey);
+    }
+
+    /**
+     * Mark a request key as validated for the current session.
+     *
+     * @param string $cachekey
+     * @return void
+     */
+    private function mark_checked_this_session(string $cachekey): void {
+        $this->get_session_cache()->set($cachekey, true);
+    }
+
+    /**
+     * Return the session-scoped cache store for remote version checks.
+     *
+     * @return \cache
+     */
+    private function get_session_cache(): \cache {
+        return \cache::make('local_timetable', 'sessionchecked');
     }
 
     /**

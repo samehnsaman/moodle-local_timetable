@@ -39,7 +39,6 @@ $PAGE->set_context($context);
 $PAGE->set_pagelayout('standard');
 $PAGE->set_title(get_string('pluginname', 'local_timetable'));
 $PAGE->set_heading(get_string('pluginname', 'local_timetable'));
-$PAGE->requires->css(new moodle_url('/local/timetable/styles.css'));
 
 if ($refresh) {
     require_sesskey();
